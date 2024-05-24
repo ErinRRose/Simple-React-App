@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>React Test</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src='https://unpkg.com/babel-standalone@6.26.0/babel.js'></script>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"
+    integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+
+
+    class Form extends React.Component {
+      state = {
+        firstName: "",
+        error: "",
+        submittedData: [],
+      };
+
+      handleFirstNameChange = (event) => {
+        this.setState({
+          firstName: event.target.value,
+        });
+      };
+
+      handleSubmit = (event) => {
+        event.preventDefault();
+        if (!this.state.submittedData.some(i => i.name == this.state.firstName))
+          $.get(`https://api.agify.io?name=${encodeURIComponent(this.state.firstName)}&country_id=US`, res => {
+            if (res.age) {
+              let dataArray = this.state.submittedData.concat(res);
+              this.setState({ submittedData: dataArray, firstName: "", error: "" });
+            } else {
+              this.setState({ error:`Unable to find: ${this.state.firstName}`});
+            }
+
+          })
+        
+
+      };
+
+      listOfSubmissions = () => {
+        return this.state.submittedData.map((data, idx) => {
+          return (
+            <div key={idx}>
+              <span>{data.name} - {data.age}</span>
+            </div>
+          );
+        });
+      };
+
+      render() {
+        return (
+          <div>
+            <form onSubmit={(event) => this.handleSubmit(event)}>
+              <input
+                type="text"
+                onChange={(event) => this.handleFirstNameChange(event)}
+                value={this.state.firstName}
+              />
+              <input type="submit" />
+              <div>{this.state.error}</div>
+            </form>
+
+            <div>
+              {this.listOfSubmissions()}
+            </div>
+          </div>
+        );
+      }
+    }
+
+
+    function Button() {
+      function handleClick() {
+
+      }
+
+      return (
+        <button onClick={handleClick}>
+          Submit
+        </button>
+      );
+    }
+    const App = () => {
+      return (<Form />);
+    }
+
+
+
+
+
+    ReactDOM.render(<App />, document.querySelector('#root'));
+  </script>
+</body>
+
+</html>
